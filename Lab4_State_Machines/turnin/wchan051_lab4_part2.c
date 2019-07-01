@@ -14,11 +14,11 @@
 
 enum States {Init, increment, decrement, reset, iwait, dwait, wait} state;
 
-unsigned char counter = 0;
+unsigned char counter = 7;
 
 void Tick(){
 	switch(state) {
-		case(Start): 
+		case(Init): 
 			state = wait; 
       break;
 		case(wait):
@@ -42,11 +42,11 @@ void Tick(){
 				state = dwait; 
 			break;
 		case(iwait):
-			if (!PINA & 0x01)
+			if (!(PINA & 0x01))
 				state = wait;
 			break;
 		case(dwait):
-			if (!PINA & 0x02)
+			if (!(PINA & 0x02))
 				state = wait;
 			break; 
 		default:
@@ -69,7 +69,7 @@ void Tick(){
       }
 			break;
 		case(reset):
-			count = 0; 
+			counter = 7; 
       break;
 		case(iwait):
 			break;

@@ -12,65 +12,80 @@
 #include "simAVRHeader.h"
 #endif
 
-enum States {Init, pressed, released, pressed2, released2} state;
+enum States {Init, increment, decrement, reset, iwait, dwait, wait} state;
 
-void Tick() {
-    switch(state) {
-	case(Init):
-	    if(PINA & 0x01) {
-		state = pressed;
-	    }
-	    break;
-	case(pressed):
-	    if(!(PINA & 0x01)) {
-		state = released;
-	    }
-	    break;
-	case(released):
-	    if(PINA & 0x01) {
-		state = pressed2;
-	    }
-	    break;
-	case(pressed2):
-	    if(!(PINA & 0x01)) {
-		state = released2;
-	    }
-	    break;
-	case(released2):
-	    if(PINA & 0x01) {
-		state = pressed;
-	    }
-	    break;
-	default:
-	    break;
-    }
+unsigned char counter = 7;
 
-    switch(state) {
-        case(Init):
-	    PORTB = 0x01;
-	    break;
-        case(pressed):
-	    PORTB = 0x01;
-	    break;
-        case(released):
-	    break;
-        case(pressed2):
-	    PORTB = 0x02;
-        case(released2):
-	    break;
-        default:
-	    break;
-    }
-}
+void Tick(){
+	switch(state) {
+		case(Init): 
+			state = wait; 
+      break;
+		case(wait):
+			if((PINA & 0x01) && (PINA & 0x02)) {
+			    state = reset;
+      }
+			else if(PINA & 0x01) {
+			    state = increment;
+      }
+			else if(PINA & 0x02) {
+			    state = decrement;
+      }
+			break;
+		case(reset):
+			state = wait; 
+      break;
+		case(increment):
+				state = iwait; 
+			break;
+		case(decrement):
+				state = dwait; 
+			break;
+		case(iwait):
+			if (!(PINA & 0x01))
+				state = wait;
+			break;
+		case(dwait):
+			if (!(PINA & 0x02))
+				state = wait;
+			break; 
+		default:
+			break;
+	}
+	switch(state) {
+		case(Init):
+			counter = 7;
+			break;
+		case(wait):
+			break;
+		case(increment):
+			if (counter < 9) {
+		      counter++; 
+      }
+			break;
+		case(decrement):
+			if (counter > 0) {
+			    counter--; 
+      }
+			break;
+		case(reset):
+			counter = 7; 
+      break;
+		case(iwait):
+			break;
+		case(dwait):
+			break;
+		default:
+			break;
+	}
+	PORTC = counter;
+ }
 
-int main(void) {
-    /* Insert DDR and PORT initializations */
-
-    /* Insert your solution below */
-    DDRA = 0x00; PORTA = 0xFF;
-    DDRB = 0xFF; PORTB = 0x00;
-    while (1) {
-        Tick();
-    }
-    return 1;
+int main(){
+	state = Init;
+	DDRA = 0x00; PORTA = 0xFF;
+	DDRC = 0xFF; PORTC = 0x00;
+	while(1) {
+      Tick();
+  }
 }
