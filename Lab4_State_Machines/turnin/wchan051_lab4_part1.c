@@ -12,80 +12,63 @@
 #include "simAVRHeader.h"
 #endif
 
-enum States {Init, increment, decrement, reset, iwait, dwait, wait} state;
+enum States {Init, pressed0, released0, pressed1, released1} state;
 
-unsigned char counter = 7;
 
 void Tick(){
-	switch(state) {
+	switch(state){ 
 		case(Init): 
-			state = wait; 
-      break;
-		case(wait):
-			if((PINA & 0x01) && (PINA & 0x02)) {
-			    state = reset;
-      }
-			else if(PINA & 0x01) {
-			    state = increment;
-      }
-			else if(PINA & 0x02) {
-			    state = decrement;
-      }
+			if (PINA & 0x01) { 
+				state = pressed1; 
+			}
 			break;
-		case(reset):
-			state = wait; 
-      break;
-		case(increment):
-				state = iwait; 
+		case(pressed0):
+			if (!PINA & 0x01) { 
+				state = released0; 
+			}
 			break;
-		case(decrement):
-				state = dwait; 
+		case(released0):
+			if (PINA & 0x01) {
+				state = pressed1; 
+			}
 			break;
-		case(iwait):
-			if (!(PINA & 0x01))
-				state = wait;
+		case(pressed1):
+			if(!PINA & 0x01) {
+				state = released1; 
+			}
 			break;
-		case(dwait):
-			if (!(PINA & 0x02))
-				state = wait;
-			break; 
+		case(released1):
+			if(PINA & 0x01) {
+				state = pressed0;
+			}
+			break;
 		default:
 			break;
 	}
-	switch(state) {
+	switch(state) { 
 		case(Init):
-			counter = 7;
+			PORTB = 0x01;
 			break;
-		case(wait):
+		case(pressed0):
+			PORTB = 0x01; 
 			break;
-		case(increment):
-			if (counter < 9) {
-		      counter++; 
-      }
+		case(released0):
+			break; 
+		case(pressed1):
+			PORTB = 0x02;
 			break;
-		case(decrement):
-			if (counter > 0) {
-			    counter--; 
-      }
-			break;
-		case(reset):
-			counter = 7; 
-      break;
-		case(iwait):
-			break;
-		case(dwait):
+		case(released1):
 			break;
 		default:
 			break;
 	}
-	PORTC = counter;
  }
 
-int main(){
+int main() {
 	state = Init;
 	DDRA = 0x00; PORTA = 0xFF;
-	DDRC = 0xFF; PORTC = 0x00;
+	DDRB = 0xFF; PORTB = 0x00; 
 	while(1) {
-      Tick();
-  }
+		Tick();
+	}
 }
