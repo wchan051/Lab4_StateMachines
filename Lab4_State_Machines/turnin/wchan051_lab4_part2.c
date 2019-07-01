@@ -86,6 +86,6 @@ int main(){
 	DDRA = 0x00; PORTA = 0xFF;
 	DDRC = 0xFF; PORTC = 0x00;
 	while(1) {
-      Tick();
-  }
+      	    Tick();
+  	}
 }
