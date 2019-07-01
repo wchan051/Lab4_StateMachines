@@ -19,7 +19,7 @@ void Tick(){
 	switch(state){ 
 		case(Init): 
 			if (PINA & 0x01) { 
-				state = pressed1; 
+				state = pressed0; 
 			}
 			break;
 		case(pressed0):
